@@ -5,6 +5,8 @@ VisualStudioVersion = 17.3.32811.315
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "autodiff_lib", "autodiff_lib\autodiff_lib.vcxproj", "{BFB86F8A-9971-452C-B784-442CEAA16933}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "autodiff_test", "autodiff_test\autodiff_test.vcxproj", "{6F3EF0B3-9F94-4C9F-ABC7-73545C35630B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,14 @@ Global
 		{BFB86F8A-9971-452C-B784-442CEAA16933}.Release|x64.Build.0 = Release|x64
 		{BFB86F8A-9971-452C-B784-442CEAA16933}.Release|x86.ActiveCfg = Release|Win32
 		{BFB86F8A-9971-452C-B784-442CEAA16933}.Release|x86.Build.0 = Release|Win32
+		{6F3EF0B3-9F94-4C9F-ABC7-73545C35630B}.Debug|x64.ActiveCfg = Debug|x64
+		{6F3EF0B3-9F94-4C9F-ABC7-73545C35630B}.Debug|x64.Build.0 = Debug|x64
+		{6F3EF0B3-9F94-4C9F-ABC7-73545C35630B}.Debug|x86.ActiveCfg = Debug|Win32
+		{6F3EF0B3-9F94-4C9F-ABC7-73545C35630B}.Debug|x86.Build.0 = Debug|Win32
+		{6F3EF0B3-9F94-4C9F-ABC7-73545C35630B}.Release|x64.ActiveCfg = Release|x64
+		{6F3EF0B3-9F94-4C9F-ABC7-73545C35630B}.Release|x64.Build.0 = Release|x64
+		{6F3EF0B3-9F94-4C9F-ABC7-73545C35630B}.Release|x86.ActiveCfg = Release|Win32
+		{6F3EF0B3-9F94-4C9F-ABC7-73545C35630B}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
