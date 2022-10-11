@@ -36,8 +36,18 @@ Dual operator/(const Dual &u, const Dual &v) {
           (u.dual * v.real - u.real * v.dual) / (v.real * v.real)};
 }
 
+bool operator>(const Dual &u, const Dual &v) { return (u.real > v.real); }
+
+bool operator>=(const Dual &u, const Dual &v) { return (u.real >= v.real); }
+
+bool operator<(const Dual &u, const Dual &v) { return (u.real < v.real); }
+
+bool operator==(const Dual &u, const Dual &v) { return (u.real == v.real); }
+
+bool operator!=(const Dual &u, const Dual &v) { return (u.real != v.real); }
+
 std::ostream &operator<<(std::ostream &os, const Dual &d) {
-  os << "Derivative: " << d.dual;
+  os << "" << d.real << " + " << d.dual << "ε" << std::endl;
   return os;
 }
 
@@ -78,6 +88,14 @@ Dual cosh(const Dual &d) {
 
 Dual tanh(const Dual &d) {
   return {std::tanh(d.real), d.dual / std::pow(std::cosh(d.real), 2)};
+}
+
+Dual abs(const Dual &d) {
+  if (d.real > 0) {
+    return d;
+  } else {
+    return Dual(-d.real, -d.dual);
+  }
 }
 
 #endif  // AUTODIFF_AUTODIFF_H

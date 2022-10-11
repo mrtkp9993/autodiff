@@ -30,4 +30,11 @@ TEST(TestTrig, TestArc) {
   EXPECT_FLOAT_EQ(6.68170281, f.dual);
 }
 
+TEST(TestAbs, TestAbs1) {
+  Dual x(5);
+  Dual y(2, 1);
+  Dual f = pow(abs(x * y) - y, 2);
+  EXPECT_FLOAT_EQ(64, f.dual);
+}
+
 }  // namespace tests
