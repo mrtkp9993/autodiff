@@ -98,4 +98,80 @@ Dual abs(const Dual &d) {
   }
 }
 
+struct HyperDual {
+  long double real;
+  long double dual1;
+  long double dual2;
+  long double dual1dual2;
+
+  HyperDual(const long double &a) {
+    this->real = a;
+    this->dual1 = 0;
+    this->dual2 = 0;
+    this->dual1dual2 = 0;
+  }
+
+  HyperDual(const long double &a, const long double &b, const long double &c,
+            const long double &d) {
+    this->real = a;
+    this->dual1 = b;
+    this->dual2 = c;
+    this->dual1dual2 = d;
+  }
+};
+
+HyperDual operator+(const HyperDual &u, const HyperDual &v) {
+  return {u.real + v.real, u.dual1 + v.dual1, u.dual2 + v.dual2,
+          u.dual1dual2 + v.dual1dual2};
+}
+
+HyperDual operator-(const HyperDual &u, const HyperDual &v) {
+  return {u.real - v.real, u.dual1 - v.dual1, u.dual2 - v.dual2,
+          u.dual1dual2 - v.dual1dual2};
+}
+
+HyperDual operator*(const HyperDual &u, const HyperDual &v) {
+  return {u.real * v.real, u.real * v.dual1 + u.dual1 * v.real,
+          u.real * v.dual2 + u.dual2 * v.real,
+          u.real * v.dual1dual2 + u.dual1 * v.dual2 + u.dual2 * v.dual1 +
+              u.dual1dual2 * v.real};
+}
+
+HyperDual pow(const HyperDual &d, const long double &p) {
+  return {std::pow(d.real, p), d.dual1 * p * std::pow(d.real, p - 1),
+          d.dual2 * p * std::pow(d.real, p - 1),
+          d.dual1dual2 * p * std::pow(d.real, p - 1) +
+              p * (p - 1) * d.dual1 * d.dual2 * std::pow(d.real, p - 2)};
+}
+
+HyperDual operator/(const HyperDual &u, const HyperDual &v) {
+  return (u * pow(v, -1.0));
+}
+
+bool operator>(const HyperDual &u, const HyperDual &v) {
+  return (u.real > v.real);
+}
+
+bool operator>=(const HyperDual &u, const HyperDual &v) {
+  return (u.real >= v.real);
+}
+
+bool operator<(const HyperDual &u, const HyperDual &v) {
+  return (u.real < v.real);
+}
+
+bool operator==(const HyperDual &u, const HyperDual &v) {
+  return (u.real == v.real);
+}
+
+bool operator!=(const HyperDual &u, const HyperDual &v) {
+  return (u.real != v.real);
+}
+
+std::ostream &operator<<(std::ostream &os, const HyperDual &d) {
+  os << "" << d.real << " + " << d.dual1 << "ε₁ + " << d.dual2 << "ε₂ + "
+     << d.dual1dual2 << "ε₁ε₂" << std::endl;
+  return os;
+}
+
 #endif  // AUTODIFF_AUTODIFF_H
