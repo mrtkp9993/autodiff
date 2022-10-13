@@ -37,6 +37,18 @@ TEST(TestAbs, TestAbsDual) {
   EXPECT_FLOAT_EQ(64, f.dual);
 }
 
+TEST(TestCF, TestCFDual) {
+  Dual x(1.1);
+  Dual y(2.7, 1);
+  Dual f = ceil(x + y) - exp(x * y);
+  EXPECT_NEAR(-21.441, f.dual, 1e-3);
+
+  Dual x2(2.1, 1);
+  Dual y2(2.8);
+  Dual f2 = ceil(x2 * y2) - floor(x2 / y2) + exp(x2 + y2);
+  EXPECT_NEAR(134.290, f2.dual, 1e-3);
+}
+
 TEST(TestArith, TestHyperDual) {
   HyperDual x(7, 1, 0, 0);
   HyperDual y(3);
