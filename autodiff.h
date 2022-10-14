@@ -51,8 +51,6 @@ std::ostream &operator<<(std::ostream &os, const Dual &d) {
   return os;
 }
 
-Dual conj(const Dual &d) { return {d.real, -d.dual}; }
-
 Dual pow(const Dual &d, const long double &p) {
   return {std::pow(d.real, p), p * d.dual * std::pow(d.real, p - 1)};
 }
