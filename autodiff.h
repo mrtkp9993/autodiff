@@ -102,6 +102,7 @@ Dual ceil(const Dual &d) { return {std::ceil(d.real)}; }
 
 Dual floor(const Dual &d) { return {std::floor(d.real)}; }
 
+// Hyperdual implementation is not completed
 struct HyperDual {
   long double real;
   long double dual1;
