@@ -61,7 +61,7 @@ class Variable:
         assert isinstance(
             other, (int, float)
         ), "only supporting int/float powers for now"
-        out = Variable(self.f**other, (self), f"**{other}")
+        out = Variable(self.f**other, (self,), f"**{other}")
 
         def backwardfn():
             self.d += (other * self.f ** (other - 1)) * out.d
