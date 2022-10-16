@@ -1,4 +1,4 @@
-from math import log, sin, cos, tan
+from math import log, sin, cos, tan, exp
 
 
 # Some codes taken from https://github.com/karpathy/micrograd
@@ -85,6 +85,15 @@ class Variable:
 
         def backwardfn():
             self.d += 1 / self.f * out.d
+
+        out.backwardfn = backwardfn
+        return out
+
+    def exp(self):
+        out = Variable(exp(self.f), (self,), "exp")
+
+        def backwardfn():
+            self.d += exp(self.f) * out.d
 
         out.backwardfn = backwardfn
         return out
