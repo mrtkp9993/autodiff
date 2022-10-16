@@ -1,5 +1,6 @@
 from math import log, sin, cos, tan
 
+
 # Some codes taken from https://github.com/karpathy/micrograd
 class Variable:
     def __init__(self, f, children=(), op=""):
@@ -35,7 +36,7 @@ class Variable:
         out = Variable(self.f - other.f, (self, other), "-")
 
         def backwardfn():
-            self.d -= out.d
+            self.d += out.d
             other.d -= out.d
 
         out.backwardfn = backwardfn
@@ -61,7 +62,7 @@ class Variable:
         assert isinstance(
             other, (int, float)
         ), "only supporting int/float powers for now"
-        out = Variable(self.f**other, (self,), f"**{other}")
+        out = Variable(self.f ** other, (self,), f"**{other}")
 
         def backwardfn():
             self.d += (other * self.f ** (other - 1)) * out.d
@@ -71,10 +72,10 @@ class Variable:
         return out
 
     def __truediv__(self, other):
-        return self * other**-1
+        return self * other ** -1
 
     def __rtruediv__(self, other):
-        return other * self**-1
+        return other * self ** -1
 
     def __rmul__(self, other):
         return self * other
