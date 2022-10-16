@@ -1,4 +1,4 @@
-from math import log, sin, cos
+from math import log, sin, cos, tan
 
 # Some codes taken from https://github.com/karpathy/micrograd
 class Variable:
@@ -57,18 +57,6 @@ class Variable:
 
         return out
 
-    def __rmul__(self, other):
-        return self * other
-
-    def log(self):
-        out = Variable(log(self.f), (self,), "log")
-
-        def backwardfn():
-            self.d += 1 / self.f * out.d
-
-        out.backwardfn = backwardfn
-        return out
-
     def __pow__(self, other):
         assert isinstance(
             other, (int, float)
@@ -88,6 +76,18 @@ class Variable:
     def __rtruediv__(self, other):
         return other * self**-1
 
+    def __rmul__(self, other):
+        return self * other
+
+    def log(self):
+        out = Variable(log(self.f), (self,), "log")
+
+        def backwardfn():
+            self.d += 1 / self.f * out.d
+
+        out.backwardfn = backwardfn
+        return out
+
     def sin(self):
         out = Variable(sin(self.f), (self,), "sin")
 
@@ -103,6 +103,16 @@ class Variable:
 
         def backwardfn():
             self.d += -sin(self.f) * out.d
+
+        out.backwardfn = backwardfn
+
+        return out
+
+    def tan(self):
+        out = Variable(tan(self.f), (self,), "tan")
+
+        def backwardfn():
+            self.d += 2 / (1 + cos(2 * self.f))
 
         out.backwardfn = backwardfn
 
@@ -144,7 +154,7 @@ class Variable:
             return nodes, edges
 
         nodes, edges = trace(self)
-        dot = Digraph(format="png", graph_attr={"rankdir": "LR"})
+        dot = Digraph(format="png", graph_attr={"rankdir": "TB"})
         for n in nodes:
             dot.node(
                 name=str(id(n)),

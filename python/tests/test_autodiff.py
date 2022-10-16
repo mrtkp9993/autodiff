@@ -3,10 +3,11 @@ from numpy.testing import assert_almost_equal
 
 
 class TestClass:
-    def test_one(self):
-        x1 = Variable(2)
-        x2 = Variable(5)
+    def test_arith(self):
+        x = Variable(5)
+        y = Variable(-1)
+        z = Variable(7)
 
-        y = x1.log() + x1 * x2 - x2.sin()
-        y.backward()
-        assert_almost_equal(y.f, 11.652071, decimal=6)
+        f = ((x * y) - z) / (y * z)
+        f.backward()
+        assert_almost_equal(f.f, 1.71429, decimal=5)
