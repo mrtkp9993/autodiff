@@ -1,17 +1,27 @@
-from math import log, sin, cos, tan, exp
+import sys
 
+sys.setrecursionlimit(10_000)
+print("recursion limit:", sys.getrecursionlimit())
+
+import math
 
 # Some codes taken from https://github.com/karpathy/micrograd
+identifier = 1
+
+
 class Variable:
     def __init__(self, f, children=(), op=""):
+        global identifier
         self.f = f
         self.d = 0
         self.op = op
         self.backwardfn = lambda: None
         self.parents = set(children)
+        self.name = 'v' + str(identifier)
+        identifier += 1
 
     def __repr__(self):
-        return f"Variable(data={self.f}, grad={self.d}, op={self.op})"
+        return f"Variable(data={self.f}, grad={self.d}, op={self.op}, id={self.name})"
 
     def __add__(self, other):
         other = other if isinstance(other, Variable) else Variable(other)
@@ -81,7 +91,7 @@ class Variable:
         return self * other
 
     def log(self):
-        out = Variable(log(self.f), (self,), "log")
+        out = Variable(math.log(self.f), (self,), "log")
 
         def backwardfn():
             self.d += 1 / self.f * out.d
@@ -90,39 +100,39 @@ class Variable:
         return out
 
     def exp(self):
-        out = Variable(exp(self.f), (self,), "exp")
+        out = Variable(math.exp(self.f), (self,), "exp")
 
         def backwardfn():
-            self.d += exp(self.f) * out.d
+            self.d += math.exp(self.f) * out.d
 
         out.backwardfn = backwardfn
         return out
 
     def sin(self):
-        out = Variable(sin(self.f), (self,), "sin")
+        out = Variable(math.sin(self.f), (self,), "sin")
 
         def backwardfn():
-            self.d += cos(self.f) * out.d
+            self.d += math.cos(self.f) * out.d
 
         out.backwardfn = backwardfn
 
         return out
 
     def cos(self):
-        out = Variable(cos(self.f), (self,), "cos")
+        out = Variable(math.cos(self.f), (self,), "cos")
 
         def backwardfn():
-            self.d += -sin(self.f) * out.d
+            self.d += -math.sin(self.f) * out.d
 
         out.backwardfn = backwardfn
 
         return out
 
     def tan(self):
-        out = Variable(tan(self.f), (self,), "tan")
+        out = Variable(math.tan(self.f), (self,), "tan")
 
         def backwardfn():
-            self.d += 2 / (1 + cos(2 * self.f))
+            self.d += 2 / (1 + math.cos(2 * self.f))
 
         out.backwardfn = backwardfn
 
@@ -168,7 +178,7 @@ class Variable:
         for n in nodes:
             dot.node(
                 name=str(id(n)),
-                label="{f %.3f} | {d %.3f}" % (n.f, n.d),
+                label="{Value %.3f} | {Grad %.3f} | {Id %s}" % (n.f, n.d, n.name),
                 shape="record",
             )
             if n.op:
@@ -177,3 +187,15 @@ class Variable:
         for n1, n2 in edges:
             dot.edge(str(id(n2)) + n2.op, str(id(n1)))
         return dot
+
+
+def sin(x):
+    return x.sin()
+
+
+def cos(x):
+    return x.cos()
+
+
+def tan(x):
+    return x.tan()
