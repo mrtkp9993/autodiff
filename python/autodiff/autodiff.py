@@ -17,7 +17,7 @@ class Variable:
         self.op = op
         self.backwardfn = lambda: None
         self.parents = set(children)
-        self.name = 'v' + str(identifier)
+        self.name = "v" + str(identifier)
         identifier += 1
 
     def __repr__(self):
@@ -82,10 +82,10 @@ class Variable:
         return out
 
     def __truediv__(self, other):
-        return self * other ** -1
+        return self * (other ** -1)
 
     def __rtruediv__(self, other):
-        return other * self ** -1
+        return other * (self ** -1)
 
     def __rmul__(self, other):
         return self * other
@@ -132,7 +132,7 @@ class Variable:
         out = Variable(math.tan(self.f), (self,), "tan")
 
         def backwardfn():
-            self.d += 2 / (1 + math.cos(2 * self.f))
+            self.d += (1 / math.cos(self.f) ** 2) * out.d
 
         out.backwardfn = backwardfn
 
@@ -178,7 +178,8 @@ class Variable:
         for n in nodes:
             dot.node(
                 name=str(id(n)),
-                label="{Value %.3f} | {Grad %.3f} | {Id %s}" % (n.f, n.d, n.name),
+                label="{Value %.3f} | {Grad %.3f} | {Id %s}"
+                      % (n.f, n.d, n.name),
                 shape="record",
             )
             if n.op:
