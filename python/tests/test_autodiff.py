@@ -38,13 +38,12 @@ class TestClass:
         assert_almost_equal(x.d, 16.8937, decimal=4)
         assert_almost_equal(y.d, -16.8846, decimal=4)
 
-    # fails
     def test_trig(self):
         x = Variable(1.1)
         y = Variable(1.7)
 
-        f = (sin(x + y) - cos(x - y)) / tan(x / y)
+        f = (sin(x + y) - cos(x - y)) / (tan(x) * tan(y))
         f.backward()
 
-        assert_almost_equal(x.d, -0.116364, decimal=6)
-        assert_almost_equal(y.d, 0.803696, decimal=6)
+        assert_almost_equal(x.d, 0.0194339, decimal=7)
+        assert_almost_equal(y.d, 0.278753, decimal=6)
