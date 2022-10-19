@@ -58,6 +58,16 @@ class TestClass:
         assert_almost_equal(x.d, 180.016, decimal=3)
         assert_almost_equal(y.d, 11739.8, decimal=1)
 
+    def test_hyperbolic_trig(self):
+        x = Variable(1)
+        y = Variable(-1)
+
+        f = (sinh(x + y) - cosh(x - y)) / tanh(x / y)
+        f.backward()
+
+        assert_almost_equal(x.d, 0.725099, decimal=6)
+        assert_almost_equal(y.d, -8.79929, decimal=5)
+
     def test_pow_root(self):
         x = Variable(8)
         y = Variable(2)

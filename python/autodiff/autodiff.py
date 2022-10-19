@@ -181,6 +181,36 @@ class Variable:
 
         return out
 
+    def sinh(self):
+        out = Variable(math.sinh(self.f), (self,), "sinh")
+
+        def backwardfn():
+            self.d += math.cosh(self.f) * out.d
+
+        out.backwardfn = backwardfn
+
+        return out
+
+    def cosh(self):
+        out = Variable(math.cosh(self.f), (self,), "cosh")
+
+        def backwardfn():
+            self.d += math.sinh(self.f) * out.d
+
+        out.backwardfn = backwardfn
+
+        return out
+
+    def tanh(self):
+        out = Variable(math.tanh(self.f), (self,), "tanh")
+
+        def backwardfn():
+            self.d += (1 / math.cosh(self.f) ** 2) * out.d
+
+        out.backwardfn = backwardfn
+
+        return out
+
     def backward(self):
         topo = []
         visited = set()
@@ -255,6 +285,18 @@ def tan(x):
 
 def atan(x):
     return x.atan()
+
+
+def sinh(x):
+    return x.sinh()
+
+
+def cosh(x):
+    return x.cosh()
+
+
+def tanh(x):
+    return x.tanh()
 
 
 def power(x, p):
