@@ -47,3 +47,13 @@ class TestClass:
 
         assert_almost_equal(x.d, 0.0194339, decimal=7)
         assert_almost_equal(y.d, 0.278753, decimal=6)
+
+    def test_pow_root(self):
+        x = Variable(8)
+        y = Variable(2)
+
+        f = (x + y) ** 3 - (x - y).root(2)
+        f.backward()
+
+        assert_almost_equal(x.d, 299.796, decimal=3)
+        assert_almost_equal(y.d, 300.204, decimal=3)

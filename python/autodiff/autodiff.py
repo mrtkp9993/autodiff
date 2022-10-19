@@ -71,7 +71,7 @@ class Variable:
     def __pow__(self, other):
         assert isinstance(
             other, (int, float)
-        ), "only supporting int/float powers for now"
+        ), "only supporting int/float powers"
         out = Variable(self.f ** other, (self,), f"**{other}")
 
         def backwardfn():
@@ -106,6 +106,19 @@ class Variable:
             self.d += math.exp(self.f) * out.d
 
         out.backwardfn = backwardfn
+        return out
+
+    def root(self, other):
+        assert isinstance(
+            other, (int, float)
+        ), "only supporting int/float roots"
+        out = Variable(self.f ** (1 / other), (self,), f"root {other}")
+
+        def backwardfn():
+            self.d += (1 / other) * (self.f ** (1 / other - 1)) * out.d
+
+        out.backwardfn = backwardfn
+
         return out
 
     def sin(self):
@@ -200,3 +213,19 @@ def cos(x):
 
 def tan(x):
     return x.tan()
+
+
+def power(x, p):
+    return x ** p
+
+
+def root(x, n):
+    return x.root(n)
+
+
+def exp(x):
+    return x.exp()
+
+
+def log(x):
+    return x.log()
