@@ -104,3 +104,11 @@ class TestClass:
 
         assert_almost_equal(x.d, 299.796, decimal=3)
         assert_almost_equal(y.d, 300.204, decimal=3)
+
+    def test_erf(self):
+        x = Variable(0.1)
+
+        f = (x.erf() - x.erfc() * x.erfinv()) / x.erfcinv()
+        f.backward()
+
+        assert_almost_equal(x.d, 0.449368, decimal=6)

@@ -4,6 +4,7 @@ sys.setrecursionlimit(10_000)
 print("recursion limit:", sys.getrecursionlimit())
 
 import math
+import scipy.special
 
 # Some codes taken from https://github.com/karpathy/micrograd
 identifier = 1
@@ -257,6 +258,46 @@ class Variable:
 
         def backwardfn():
             self.d += (1 / (1 - self.f ** 2)) * out.d
+
+        out.backwardfn = backwardfn
+
+        return out
+
+    def erf(self):
+        out = Variable(math.erf(self.f), (self,), "erf")
+
+        def backwardfn():
+            self.d += 2 * math.exp(-math.pow(self.f, 2)) * (1 / math.sqrt(math.pi)) * out.d
+
+        out.backwardfn = backwardfn
+
+        return out
+
+    def erfinv(self):
+        out = Variable(scipy.special.erfinv(self.f), (self,), "erfinv")
+
+        def backwardfn():
+            self.d += 0.5 * math.exp(scipy.special.erfinv(self.f) ** 2) * math.sqrt(math.pi) * out.d
+
+        out.backwardfn = backwardfn
+
+        return out
+
+    def erfc(self):
+        out = Variable(math.erfc(self.f), (self,), "erfc")
+
+        def backwardfn():
+            self.d -= 2 * math.exp(-math.pow(self.f, 2)) * (1 / math.sqrt(math.pi)) * out.d
+
+        out.backwardfn = backwardfn
+
+        return out
+
+    def erfcinv(self):
+        out = Variable(scipy.special.erfcinv(self.f), (self,), "erfcinv")
+
+        def backwardfn():
+            self.d -= 0.5 * math.exp(scipy.special.erfcinv(self.f) ** 2) * math.sqrt(math.pi) * out.d
 
         out.backwardfn = backwardfn
 
