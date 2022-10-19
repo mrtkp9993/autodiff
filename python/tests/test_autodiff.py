@@ -68,6 +68,16 @@ class TestClass:
         assert_almost_equal(x.d, 0.725099, decimal=6)
         assert_almost_equal(y.d, -8.79929, decimal=5)
 
+    def test_hyperbolic_inv_trig(self):
+        x = Variable(1.6)
+        y = Variable(-80)
+
+        f = (asinh(x + y) - acosh(x - y)) / atanh(x / y)
+        f.backward()
+
+        assert_almost_equal(x.d, -317.253, decimal=3)
+        assert_almost_equal(y.d, -7.59489, decimal=5)
+
     def test_pow_root(self):
         x = Variable(8)
         y = Variable(2)

@@ -191,6 +191,16 @@ class Variable:
 
         return out
 
+    def asinh(self):
+        out = Variable(math.asinh(self.f), (self,), "arcsinh")
+
+        def backwardfn():
+            self.d += (1 / math.sqrt(1 + self.f ** 2)) * out.d
+
+        out.backwardfn = backwardfn
+
+        return out
+
     def cosh(self):
         out = Variable(math.cosh(self.f), (self,), "cosh")
 
@@ -201,11 +211,31 @@ class Variable:
 
         return out
 
+    def acosh(self):
+        out = Variable(math.acosh(self.f), (self,), "arccosh")
+
+        def backwardfn():
+            self.d += (1 / (math.sqrt(1 + self.f) * math.sqrt(-1 + self.f))) * out.d
+
+        out.backwardfn = backwardfn
+
+        return out
+
     def tanh(self):
         out = Variable(math.tanh(self.f), (self,), "tanh")
 
         def backwardfn():
             self.d += (1 / math.cosh(self.f) ** 2) * out.d
+
+        out.backwardfn = backwardfn
+
+        return out
+
+    def atanh(self):
+        out = Variable(math.atanh(self.f), (self,), "arctanh")
+
+        def backwardfn():
+            self.d += (1 / (1 - self.f ** 2)) * out.d
 
         out.backwardfn = backwardfn
 
@@ -291,12 +321,24 @@ def sinh(x):
     return x.sinh()
 
 
+def asinh(x):
+    return x.asinh()
+
+
 def cosh(x):
     return x.cosh()
 
 
+def acosh(x):
+    return x.acosh()
+
+
 def tanh(x):
     return x.tanh()
+
+
+def atanh(x):
+    return x.atanh()
 
 
 def power(x, p):
