@@ -54,7 +54,7 @@ class Variable:
         return out
 
     def __rsub__(self, other):
-        return other + (-self)
+        return -self + other
 
     def __mul__(self, other):
         other = other if isinstance(other, Variable) else Variable(other)
@@ -67,6 +67,9 @@ class Variable:
         out.backwardfn = backwardfn
 
         return out
+
+    def __rmul__(self, other):
+        return self * other
 
     def __pow__(self, other):
         assert isinstance(
@@ -86,9 +89,6 @@ class Variable:
 
     def __rtruediv__(self, other):
         return other * (self ** -1)
-
-    def __rmul__(self, other):
-        return self * other
 
     def log(self):
         out = Variable(math.log(self.f), (self,), "log")
@@ -131,6 +131,16 @@ class Variable:
 
         return out
 
+    def asin(self):
+        out = Variable(math.asin(self.f), (self,), "arcsin")
+
+        def backwardfn():
+            self.d += (1 / math.sqrt(1 - self.f ** 2)) * out.d
+
+        out.backwardfn = backwardfn
+
+        return out
+
     def cos(self):
         out = Variable(math.cos(self.f), (self,), "cos")
 
@@ -141,11 +151,31 @@ class Variable:
 
         return out
 
+    def acos(self):
+        out = Variable(math.acos(self.f), (self,), "arccos")
+
+        def backwardfn():
+            self.d += (-1 / math.sqrt(1 - self.f ** 2)) * out.d
+
+        out.backwardfn = backwardfn
+
+        return out
+
     def tan(self):
         out = Variable(math.tan(self.f), (self,), "tan")
 
         def backwardfn():
             self.d += (1 / math.cos(self.f) ** 2) * out.d
+
+        out.backwardfn = backwardfn
+
+        return out
+
+    def atan(self):
+        out = Variable(math.atan(self.f), (self,), "arctan")
+
+        def backwardfn():
+            self.d += (1 / (1 + self.f ** 2)) * out.d
 
         out.backwardfn = backwardfn
 
@@ -207,12 +237,24 @@ def sin(x):
     return x.sin()
 
 
+def asin(x):
+    return x.asin()
+
+
 def cos(x):
     return x.cos()
 
 
+def acos(x):
+    return x.acos()
+
+
 def tan(x):
     return x.tan()
+
+
+def atan(x):
+    return x.atan()
 
 
 def power(x, p):
