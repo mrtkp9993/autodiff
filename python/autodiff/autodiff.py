@@ -341,12 +341,21 @@ class Variable:
         nodes, edges = trace(self)
         dot = Digraph(format="png", graph_attr={"rankdir": "TB"})
         for n in nodes:
-            dot.node(
-                name=str(id(n)),
-                label="{Value %.3f} | {Grad %.3f} | {Id %s}"
-                      % (n.f, n.d, n.name),
-                shape="record",
-            )
+            if n.op == "":
+                dot.node(
+                    name=str(id(n)),
+                    label="{Value %.3f} | {Grad %.3f} | {Id %s} | Input"
+                          % (n.f, n.d, n.name),
+                    shape="record",
+                    _attributes={"color": "blue"}
+                )
+            else:
+                dot.node(
+                    name=str(id(n)),
+                    label="{Value %.3f} | {Grad %.3f} | {Id %s}"
+                          % (n.f, n.d, n.name),
+                    shape="record",
+                )
             if n.op:
                 dot.node(name=str(id(n)) + n.op, label=n.op)
                 dot.edge(str(id(n)), str(id(n)) + n.op)
