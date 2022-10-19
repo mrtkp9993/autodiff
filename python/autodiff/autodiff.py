@@ -97,6 +97,17 @@ class Variable:
             self.d += 1 / self.f * out.d
 
         out.backwardfn = backwardfn
+
+        return out
+
+    def logb(self, base):
+        out = Variable(math.log(self.f, base), (self,), f"log{base}")
+
+        def backwardfn():
+            self.d += (- math.log(base) / (self.f * math.log(self.f) ** 2)) * out.d
+
+        out.backwardfn = backwardfn
+
         return out
 
     def exp(self):
@@ -365,6 +376,10 @@ def exp(x):
 
 def log(x):
     return x.log()
+
+
+def logb(x, b):
+    return x.logb(b)
 
 
 def abs(x):

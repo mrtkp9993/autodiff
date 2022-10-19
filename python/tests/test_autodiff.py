@@ -38,6 +38,14 @@ class TestClass:
         assert_almost_equal(x.d, 16.8937, decimal=4)
         assert_almost_equal(y.d, -16.8846, decimal=4)
 
+    def test_log_b(self):
+        x = Variable(5)
+
+        f = logb(x, 11)
+        f.backward()
+
+        assert_almost_equal(x.d, -0.185145, decimal=6)
+
     def test_abs(self):
         x = Variable(1)
         y = Variable(1)
