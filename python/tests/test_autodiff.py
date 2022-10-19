@@ -38,6 +38,15 @@ class TestClass:
         assert_almost_equal(x.d, 16.8937, decimal=4)
         assert_almost_equal(y.d, -16.8846, decimal=4)
 
+    def test_abs(self):
+        x = Variable(1)
+        y = Variable(1)
+
+        f = abs(x) * cos(x + y)
+        f.backward()
+
+        assert_almost_equal(x.d, -1.32544, decimal=5)
+
     def test_trig(self):
         x = Variable(1.1)
         y = Variable(1.7)

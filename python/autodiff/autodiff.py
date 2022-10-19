@@ -121,6 +121,16 @@ class Variable:
 
         return out
 
+    def abs(self):
+        out = Variable(math.fabs(self.f), (self,), "abs")
+
+        def backwardfn():
+            self.d += (math.fabs(self.f) / self.f) * out.d
+
+        out.backwardfn = backwardfn
+
+        return out
+
     def sin(self):
         out = Variable(math.sin(self.f), (self,), "sin")
 
@@ -355,3 +365,7 @@ def exp(x):
 
 def log(x):
     return x.log()
+
+
+def abs(x):
+    return x.abs()
