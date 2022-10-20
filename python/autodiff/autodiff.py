@@ -13,26 +13,38 @@ identifier = 1
 class Variable:
     def __init__(self, f, children=(), op=""):
         global identifier
-        self.f = f
-        self.d = 0
-        self.op = op
-        self.backwardfn = lambda: None
-        self.parents = set(children)
-        self.name = "v" + str(identifier)
+        self.__f = f
+        self.__d = 0
+        self.__op = op
+        self.__backwardfn = lambda: None
+        self.__parents = set(children)
+        self.__name = "v" + str(identifier)
         identifier += 1
 
+    def get_data(self):
+        return self.__f
+
+    def get_grad(self):
+        return self.__d
+
+    def get_op(self):
+        return self.__op
+
+    def get_name(self):
+        return self.__name
+
     def __repr__(self):
-        return f"Variable(data={self.f}, grad={self.d}, op={self.op}, id={self.name})"
+        return f"Variable(data={self.get_data()}, grad={self.get_grad()}, op={self.get_op()}, id={self.get_name()})"
 
     def __add__(self, other):
         other = other if isinstance(other, Variable) else Variable(other)
-        out = Variable(self.f + other.f, (self, other), "+")
+        out = Variable(self.get_data() + other.get_data(), (self, other), "+")
 
-        def backwardfn():
-            self.d += out.d
-            other.d += out.d
+        def __backwardfn():
+            self.__d += out.get_grad()
+            other.__d += out.get_grad()
 
-        out.backwardfn = backwardfn
+        out.__backwardfn = __backwardfn
 
         return out
 
@@ -44,13 +56,13 @@ class Variable:
 
     def __sub__(self, other):
         other = other if isinstance(other, Variable) else Variable(other)
-        out = Variable(self.f - other.f, (self, other), "-")
+        out = Variable(self.get_data() - other.get_data(), (self, other), "-")
 
-        def backwardfn():
-            self.d += out.d
-            other.d -= out.d
+        def __backwardfn():
+            self.__d += out.get_grad()
+            other.__d -= out.get_grad()
 
-        out.backwardfn = backwardfn
+        out.__backwardfn = __backwardfn
 
         return out
 
@@ -59,13 +71,13 @@ class Variable:
 
     def __mul__(self, other):
         other = other if isinstance(other, Variable) else Variable(other)
-        out = Variable(self.f * other.f, (self, other), "*")
+        out = Variable(self.get_data() * other.get_data(), (self, other), "*")
 
-        def backwardfn():
-            self.d += other.f * out.d
-            other.d += self.f * out.d
+        def __backwardfn():
+            self.__d += other.get_data() * out.get_grad()
+            other.__d += self.get_data() * out.get_grad()
 
-        out.backwardfn = backwardfn
+        out.__backwardfn = __backwardfn
 
         return out
 
@@ -76,230 +88,275 @@ class Variable:
         assert isinstance(
             other, (int, float)
         ), "only supporting int/float powers"
-        out = Variable(self.f ** other, (self,), f"**{other}")
+        out = Variable(self.get_data() ** other, (self,), f"**{other}")
 
-        def backwardfn():
-            self.d += (other * self.f ** (other - 1)) * out.d
+        def __backwardfn():
+            self.__d += (
+                other * self.get_data() ** (other - 1)
+            ) * out.get_grad()
 
-        out.backwardfn = backwardfn
+        out.__backwardfn = __backwardfn
 
         return out
 
     def __truediv__(self, other):
-        return self * (other ** -1)
+        return self * (other**-1)
 
     def __rtruediv__(self, other):
-        return other * (self ** -1)
+        return other * (self**-1)
 
     def log(self):
-        out = Variable(math.log(self.f), (self,), "log")
+        out = Variable(math.log(self.get_data()), (self,), "log")
 
-        def backwardfn():
-            self.d += 1 / self.f * out.d
+        def __backwardfn():
+            self.__d += 1 / self.get_data() * out.get_grad()
 
-        out.backwardfn = backwardfn
+        out.__backwardfn = __backwardfn
 
         return out
 
     def logb(self, base):
-        out = Variable(math.log(self.f, base), (self,), f"log{base}")
+        out = Variable(math.log(self.get_data(), base), (self,), f"log{base}")
 
-        def backwardfn():
-            self.d += (- math.log(base) / (self.f * math.log(self.f) ** 2)) * out.d
+        def __backwardfn():
+            self.__d += (
+                -math.log(base)
+                / (self.get_data() * math.log(self.get_data()) ** 2)
+            ) * out.get_grad()
 
-        out.backwardfn = backwardfn
+        out.__backwardfn = __backwardfn
 
         return out
 
     def exp(self):
-        out = Variable(math.exp(self.f), (self,), "exp")
+        out = Variable(math.exp(self.get_data()), (self,), "exp")
 
-        def backwardfn():
-            self.d += math.exp(self.f) * out.d
+        def __backwardfn():
+            self.__d += math.exp(self.get_data()) * out.get_grad()
 
-        out.backwardfn = backwardfn
+        out.__backwardfn = __backwardfn
         return out
 
     def root(self, other):
         assert isinstance(
             other, (int, float)
         ), "only supporting int/float roots"
-        out = Variable(self.f ** (1 / other), (self,), f"root {other}")
+        out = Variable(self.get_data() ** (1 / other), (self,), f"root {other}")
 
-        def backwardfn():
-            self.d += (1 / other) * (self.f ** (1 / other - 1)) * out.d
+        def __backwardfn():
+            self.__d += (
+                (1 / other)
+                * (self.get_data() ** (1 / other - 1))
+                * out.get_grad()
+            )
 
-        out.backwardfn = backwardfn
+        out.__backwardfn = __backwardfn
 
         return out
 
     def abs(self):
-        out = Variable(math.fabs(self.f), (self,), "abs")
+        out = Variable(math.fabs(self.get_data()), (self,), "abs")
 
-        def backwardfn():
-            self.d += (math.fabs(self.f) / self.f) * out.d
+        def __backwardfn():
+            self.__d += (
+                math.fabs(self.get_data()) / self.get_data()
+            ) * out.get_grad()
 
-        out.backwardfn = backwardfn
+        out.__backwardfn = __backwardfn
 
         return out
 
     def sin(self):
-        out = Variable(math.sin(self.f), (self,), "sin")
+        out = Variable(math.sin(self.get_data()), (self,), "sin")
 
-        def backwardfn():
-            self.d += math.cos(self.f) * out.d
+        def __backwardfn():
+            self.__d += math.cos(self.get_data()) * out.get_grad()
 
-        out.backwardfn = backwardfn
+        out.__backwardfn = __backwardfn
 
         return out
 
     def asin(self):
-        out = Variable(math.asin(self.f), (self,), "arcsin")
+        out = Variable(math.asin(self.get_data()), (self,), "arcsin")
 
-        def backwardfn():
-            self.d += (1 / math.sqrt(1 - self.f ** 2)) * out.d
+        def __backwardfn():
+            self.__d += (
+                1 / math.sqrt(1 - self.get_data() ** 2)
+            ) * out.get_grad()
 
-        out.backwardfn = backwardfn
+        out.__backwardfn = __backwardfn
 
         return out
 
     def cos(self):
-        out = Variable(math.cos(self.f), (self,), "cos")
+        out = Variable(math.cos(self.get_data()), (self,), "cos")
 
-        def backwardfn():
-            self.d += -math.sin(self.f) * out.d
+        def __backwardfn():
+            self.__d += -math.sin(self.get_data()) * out.get_grad()
 
-        out.backwardfn = backwardfn
+        out.__backwardfn = __backwardfn
 
         return out
 
     def acos(self):
-        out = Variable(math.acos(self.f), (self,), "arccos")
+        out = Variable(math.acos(self.get_data()), (self,), "arccos")
 
-        def backwardfn():
-            self.d += (-1 / math.sqrt(1 - self.f ** 2)) * out.d
+        def __backwardfn():
+            self.__d += (
+                -1 / math.sqrt(1 - self.get_data() ** 2)
+            ) * out.get_grad()
 
-        out.backwardfn = backwardfn
+        out.__backwardfn = __backwardfn
 
         return out
 
     def tan(self):
-        out = Variable(math.tan(self.f), (self,), "tan")
+        out = Variable(math.tan(self.get_data()), (self,), "tan")
 
-        def backwardfn():
-            self.d += (1 / math.cos(self.f) ** 2) * out.d
+        def __backwardfn():
+            self.__d += (1 / math.cos(self.get_data()) ** 2) * out.get_grad()
 
-        out.backwardfn = backwardfn
+        out.__backwardfn = __backwardfn
 
         return out
 
     def atan(self):
-        out = Variable(math.atan(self.f), (self,), "arctan")
+        out = Variable(math.atan(self.get_data()), (self,), "arctan")
 
-        def backwardfn():
-            self.d += (1 / (1 + self.f ** 2)) * out.d
+        def __backwardfn():
+            self.__d += (1 / (1 + self.get_data() ** 2)) * out.get_grad()
 
-        out.backwardfn = backwardfn
+        out.__backwardfn = __backwardfn
 
         return out
 
     def sinh(self):
-        out = Variable(math.sinh(self.f), (self,), "sinh")
+        out = Variable(math.sinh(self.get_data()), (self,), "sinh")
 
-        def backwardfn():
-            self.d += math.cosh(self.f) * out.d
+        def __backwardfn():
+            self.__d += math.cosh(self.get_data()) * out.get_grad()
 
-        out.backwardfn = backwardfn
+        out.__backwardfn = __backwardfn
 
         return out
 
     def asinh(self):
-        out = Variable(math.asinh(self.f), (self,), "arcsinh")
+        out = Variable(math.asinh(self.get_data()), (self,), "arcsinh")
 
-        def backwardfn():
-            self.d += (1 / math.sqrt(1 + self.f ** 2)) * out.d
+        def __backwardfn():
+            self.__d += (
+                1 / math.sqrt(1 + self.get_data() ** 2)
+            ) * out.get_grad()
 
-        out.backwardfn = backwardfn
+        out.__backwardfn = __backwardfn
 
         return out
 
     def cosh(self):
-        out = Variable(math.cosh(self.f), (self,), "cosh")
+        out = Variable(math.cosh(self.get_data()), (self,), "cosh")
 
-        def backwardfn():
-            self.d += math.sinh(self.f) * out.d
+        def __backwardfn():
+            self.__d += math.sinh(self.get_data()) * out.get_grad()
 
-        out.backwardfn = backwardfn
+        out.__backwardfn = __backwardfn
 
         return out
 
     def acosh(self):
-        out = Variable(math.acosh(self.f), (self,), "arccosh")
+        out = Variable(math.acosh(self.get_data()), (self,), "arccosh")
 
-        def backwardfn():
-            self.d += (1 / (math.sqrt(1 + self.f) * math.sqrt(-1 + self.f))) * out.d
+        def __backwardfn():
+            self.__d += (
+                1
+                / (
+                    math.sqrt(1 + self.get_data())
+                    * math.sqrt(-1 + self.get_data())
+                )
+            ) * out.get_grad()
 
-        out.backwardfn = backwardfn
+        out.__backwardfn = __backwardfn
 
         return out
 
     def tanh(self):
-        out = Variable(math.tanh(self.f), (self,), "tanh")
+        out = Variable(math.tanh(self.get_data()), (self,), "tanh")
 
-        def backwardfn():
-            self.d += (1 / math.cosh(self.f) ** 2) * out.d
+        def __backwardfn():
+            self.__d += (1 / math.cosh(self.get_data()) ** 2) * out.get_grad()
 
-        out.backwardfn = backwardfn
+        out.__backwardfn = __backwardfn
 
         return out
 
     def atanh(self):
-        out = Variable(math.atanh(self.f), (self,), "arctanh")
+        out = Variable(math.atanh(self.get_data()), (self,), "arctanh")
 
-        def backwardfn():
-            self.d += (1 / (1 - self.f ** 2)) * out.d
+        def __backwardfn():
+            self.__d += (1 / (1 - self.get_data() ** 2)) * out.get_grad()
 
-        out.backwardfn = backwardfn
+        out.__backwardfn = __backwardfn
 
         return out
 
     def erf(self):
-        out = Variable(math.erf(self.f), (self,), "erf")
+        out = Variable(math.erf(self.get_data()), (self,), "erf")
 
-        def backwardfn():
-            self.d += 2 * math.exp(-math.pow(self.f, 2)) * (1 / math.sqrt(math.pi)) * out.d
+        def __backwardfn():
+            self.__d += (
+                2
+                * math.exp(-math.pow(self.get_data(), 2))
+                * (1 / math.sqrt(math.pi))
+                * out.get_grad()
+            )
 
-        out.backwardfn = backwardfn
+        out.__backwardfn = __backwardfn
 
         return out
 
     def erfinv(self):
-        out = Variable(scipy.special.erfinv(self.f), (self,), "erfinv")
+        out = Variable(scipy.special.erfinv(self.get_data()), (self,), "erfinv")
 
-        def backwardfn():
-            self.d += 0.5 * math.exp(scipy.special.erfinv(self.f) ** 2) * math.sqrt(math.pi) * out.d
+        def __backwardfn():
+            self.__d += (
+                0.5
+                * math.exp(scipy.special.erfinv(self.get_data()) ** 2)
+                * math.sqrt(math.pi)
+                * out.get_grad()
+            )
 
-        out.backwardfn = backwardfn
+        out.__backwardfn = __backwardfn
 
         return out
 
     def erfc(self):
-        out = Variable(math.erfc(self.f), (self,), "erfc")
+        out = Variable(math.erfc(self.get_data()), (self,), "erfc")
 
-        def backwardfn():
-            self.d -= 2 * math.exp(-math.pow(self.f, 2)) * (1 / math.sqrt(math.pi)) * out.d
+        def __backwardfn():
+            self.__d -= (
+                2
+                * math.exp(-math.pow(self.get_data(), 2))
+                * (1 / math.sqrt(math.pi))
+                * out.get_grad()
+            )
 
-        out.backwardfn = backwardfn
+        out.__backwardfn = __backwardfn
 
         return out
 
     def erfcinv(self):
-        out = Variable(scipy.special.erfcinv(self.f), (self,), "erfcinv")
+        out = Variable(
+            scipy.special.erfcinv(self.get_data()), (self,), "erfcinv"
+        )
 
-        def backwardfn():
-            self.d -= 0.5 * math.exp(scipy.special.erfcinv(self.f) ** 2) * math.sqrt(math.pi) * out.d
+        def __backwardfn():
+            self.__d -= (
+                0.5
+                * math.exp(scipy.special.erfcinv(self.get_data()) ** 2)
+                * math.sqrt(math.pi)
+                * out.get_grad()
+            )
 
-        out.backwardfn = backwardfn
+        out.__backwardfn = __backwardfn
 
         return out
 
@@ -310,16 +367,16 @@ class Variable:
         def build_topo(v):
             if v not in visited:
                 visited.add(v)
-                for child in v.parents:
+                for child in v.__parents:
                     build_topo(child)
                 topo.append(v)
 
         build_topo(self)
 
-        self.d = 1
+        self.__d = 1
         for v in reversed(topo):
             print(v)
-            v.backwardfn()
+            v.__backwardfn()
 
     # https://mdrk.io/introduction-to-automatic-differentiation-part2/
     def draw_dag(self):
@@ -345,15 +402,15 @@ class Variable:
                 dot.node(
                     name=str(id(n)),
                     label="{Value %.3f} | {Grad %.3f} | {Id %s} | Input"
-                          % (n.f, n.d, n.name),
+                    % (n.f, n.d, n.name),
                     shape="record",
-                    _attributes={"color": "blue"}
+                    _attributes={"color": "blue"},
                 )
             else:
                 dot.node(
                     name=str(id(n)),
                     label="{Value %.3f} | {Grad %.3f} | {Id %s}"
-                          % (n.f, n.d, n.name),
+                    % (n.f, n.d, n.name),
                     shape="record",
                 )
             if n.op:
@@ -413,7 +470,7 @@ def atanh(x):
 
 
 def power(x, p):
-    return x ** p
+    return x**p
 
 
 def root(x, n):
